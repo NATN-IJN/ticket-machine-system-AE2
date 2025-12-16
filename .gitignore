@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Kotlin/JVM
+out/
+
+# macOS
+.DS_Store
+
+# DB runtime copy
+.ticketmachineae2/
+
+# Logs
+*.log
