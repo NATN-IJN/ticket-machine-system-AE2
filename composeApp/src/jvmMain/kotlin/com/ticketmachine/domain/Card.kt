@@ -2,8 +2,7 @@ package com.ticketmachine.domain
 
 class Card(
     val cardNumber: String,
-    var balance: Double,
-    val owner: User?
+    var balance: Double
 ) {
 
     fun deduct(price: Double) {

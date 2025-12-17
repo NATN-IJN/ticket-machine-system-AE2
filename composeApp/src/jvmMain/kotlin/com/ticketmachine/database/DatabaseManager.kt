@@ -89,3 +89,14 @@ object DatabaseManager {
         return target
     }
 }
+    fun getCard(cardNumber: String): Card? = transaction {
+        CardsTable
+            .select { CardsTable.cardNumber eq cardNumber }
+            .singleOrNull()
+            ?.let {
+                Card(
+                    cardNumber = it[CardsTable.cardNumber],
+                    balance = it[CardsTable.balance],
+                )
+            }
+    }
