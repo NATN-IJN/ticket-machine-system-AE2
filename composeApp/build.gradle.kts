@@ -27,6 +27,12 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            val exposedVersion = "0.55.0"
+            implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+            implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+            implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+            implementation("org.xerial:sqlite-jdbc:3.46.1.0")
+            implementation("ch.qos.logback:logback-classic:1.5.6")
         }
     }
 }
