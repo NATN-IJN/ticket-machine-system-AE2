@@ -1,11 +1,12 @@
 package com.ticketmachine.database
 
+import com.ticketmachine.domain.Card
 import com.ticketmachine.domain.Destination
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.Path
+//import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.outputStream
 
@@ -99,4 +100,12 @@ object DatabaseManager {
                     balance = it[CardsTable.balance],
                 )
             }
+    }
+
+    fun updateCard(card: Card) = transaction {
+        CardsTable.update(
+            where = { CardsTable.cardNumber eq card.cardNumber }
+        ) {
+            it[balance] = card.balance
+        }
     }
