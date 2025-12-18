@@ -4,6 +4,7 @@ import com.ticketmachine.domain.Admin
 import com.ticketmachine.domain.SpecialOffer
 import com.ticketmachine.domain.Ticket
 import com.ticketmachine.domain.TicketType
+import com.ticketmachine.domain.TicketStatus
 import com.ticketmachine.domain.User
 import java.time.LocalDate
 import com.ticketmachine.domain.Card
@@ -135,15 +136,36 @@ object DatabaseManager {
     }
 
     fun createTicket(
-        ticketRef: String,
+        destination: Destination,
+        type: TicketType,
+        price: Double,
         username: String,
         cardNumber: String,
-        destinationName: String,
-        ticketType: TicketType,
-        pricePaid: Double
-    ): Ticket {
-        // TODO: insert into Tickets table and return a Ticket object
-        throw NotImplementedError("createTicket not implemented yet")
+        origin: String
+    ): Ticket = transaction {
+
+        val ticketRef = generateTicketRef()
+        val purchaseDate = LocalDate.now().toString()
+
+        TicketsTable.insert {
+            it[TicketsTable.ticketRef] = ticketRef
+            it[TicketsTable.username] = username
+            it[TicketsTable.cardNumber] = cardNumber
+            it[TicketsTable.destinationName] = destination.name
+            it[TicketsTable.type] = type.name
+            it[TicketsTable.price] = price
+            it[TicketsTable.status] = TicketStatus.ACTIVE.name
+            it[TicketsTable.purchaseDate] = purchaseDate
+        }
+
+        Ticket(
+            ticketRef = ticketRef,
+            origin = origin,                 // passed in
+            destination = destination,
+            price = price,
+            type = type,
+            status = TicketStatus.ACTIVE
+        )
     }
 
     fun updateTicketStatus(ticketRef: String){
@@ -184,5 +206,18 @@ object DatabaseManager {
     fun deleteSpecialOffer(id: String) {
         // TODO: delete from SpecialOffers table by offerId
         throw NotImplementedError("deleteSpecialOffer not implemented yet")
+    }
+
+    fun findActiveOffer(
+        destination: Destination,
+        type: TicketType,
+        onDate: LocalDate
+    ): SpecialOffer? {
+        return TODO("returns active special offers")
+    }
+
+    private fun generateTicketRef(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..4).map { chars.random() }.joinToString("")
     }
 }
