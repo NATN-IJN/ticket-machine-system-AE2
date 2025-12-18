@@ -9,16 +9,32 @@ class AdminHub(
 ) {
     private var currentAdmin: Admin? = null
 
-    fun login(username: String, password: String): Boolean
+    fun login(username: String, password: String): Boolean{
+        return true
+    }
     fun setCurrentAdmin(admin: Admin) { currentAdmin = admin }
 
-    fun adminMenu()
+    fun adminMenu() {
 
-    fun viewDestination(name: String): Destination?
-    fun addDestination()
-    fun updateDestinationPrices(name: String)
+    }
 
-    fun addSpecialOffer(name: String)
-    fun searchSpecialOfferId(id: String)
-    fun confirmDelete()
+    fun viewDestination(name: String): Destination?{
+        return TODO("Provide the return value")
+    }
+    fun addDestination(){
+        return TODO("Provide the return value")
+    }
+    fun updateDestinationPrices(name: String){
+        return TODO("Provide the return value")
+    }
+
+    fun addSpecialOffer(name: String){
+        return TODO("Provide the return value")
+    }
+    fun searchSpecialOfferId(id: String){
+        return TODO("Provide the return value")
+    }
+    fun confirmDelete(){
+        return TODO("Provide the return value")
+    }
 }
