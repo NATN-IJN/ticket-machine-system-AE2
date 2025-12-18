@@ -7,6 +7,10 @@ class TicketMachine(
     private val originStation: String,
     private val database: DatabaseManager
 ) {
+    private var lastSearchedDestination: Destination? = null
+    private var lastSearchedType: TicketType? = null
+    private var lastCalculatedPrice: Double? = null
+    private var lastAppliedOffer: SpecialOffer? = null   // optional, useful later
     private var currentUser: User? = null
     private var currentCard: Card? = null
 
@@ -30,7 +34,7 @@ class TicketMachine(
         return card
     }
 
-    fun updateTicket(ticketRef: String){
+    fun updateTicket(ticketRef: String, status: TicketStatus){
         return TODO("Provide the return value")
     }
     fun setCurrentUser(user: User) { currentUser = user }
