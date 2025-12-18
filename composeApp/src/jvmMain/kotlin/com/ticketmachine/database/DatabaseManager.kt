@@ -1,5 +1,11 @@
 package com.ticketmachine.database
 
+import com.ticketmachine.domain.Admin
+import com.ticketmachine.domain.SpecialOffer
+import com.ticketmachine.domain.Ticket
+import com.ticketmachine.domain.TicketType
+import com.ticketmachine.domain.User
+import java.time.LocalDate
 import com.ticketmachine.domain.Card
 import com.ticketmachine.domain.Destination
 import org.jetbrains.exposed.sql.*
@@ -109,5 +115,74 @@ object DatabaseManager {
         ) {
             it[balance] = card.balance
         }
+    }
+
+
+    fun findDestination(name: String): Destination? {
+        // TODO: query DestinationsTable by name
+        return null
+    }
+
+    fun checkSpecialOffer(dest: Destination, type: TicketType): SpecialOffer? {
+        // TODO: query SpecialOffersTable for active offer for (dest, type, date)
+        return null
+    }
+
+    fun chargeCard(card: Card, amount: Double): Boolean {
+        // TODO: read balance from card.cardNumber and compare with calculated price.
+        //  if balance > price -> return true else false
+        return false
+    }
+
+    fun createTicket(
+        ticketRef: String,
+        username: String,
+        cardNumber: String,
+        destinationName: String,
+        ticketType: TicketType,
+        pricePaid: Double
+    ): Ticket {
+        // TODO: insert into Tickets table and return a Ticket object
+        throw NotImplementedError("createTicket not implemented yet")
+    }
+
+    fun updateTicketStatus(ticketRef: String){
+        // TODO: Changes ticketStatus to CANCELLED/REFUNDED
+    }
+
+    fun getTicket(ticketRef: String, user: String?): Ticket? {
+        // TODO: query Tickets table by ticketRef and user
+        return null
+    }
+
+    fun getAdmin(username: String): Admin? {
+        // TODO: query Admins table by username
+        return null
+    }
+
+    fun createDestination(name: String, singlePrice: Double, returnPrice: Double) {
+        // TODO: insert new destination into DestinationsTable
+        throw NotImplementedError("createDestination not implemented yet")
+    }
+
+    fun saveSpecialOffer(
+        destination: Destination,
+        ticketType: TicketType,
+        discount: Double,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): SpecialOffer {
+        // TODO: insert new special offer into SpecialOffers table and return SpecialOffer object
+        throw NotImplementedError("saveSpecialOffer not implemented yet")
+    }
+
+    fun getSpecialOffer(id: String): SpecialOffer? {
+        // TODO: query SpecialOffers table by offerId
+        return null
+    }
+
+    fun deleteSpecialOffer(id: String) {
+        // TODO: delete from SpecialOffers table by offerId
+        throw NotImplementedError("deleteSpecialOffer not implemented yet")
     }
 }
