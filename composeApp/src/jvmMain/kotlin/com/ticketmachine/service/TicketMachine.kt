@@ -2,8 +2,7 @@ package com.ticketmachine.service
 
 import com.ticketmachine.database.DatabaseManager
 import com.ticketmachine.domain.*
-import java.time.LocalDateTime
-
+import java.time.LocalDate
 class TicketMachine(
     private val originStation: String,
     private val database: DatabaseManager
@@ -22,9 +21,8 @@ class TicketMachine(
             if (type == TicketType.SINGLE) dest.singlePrice
             else dest.returnPrice
 
-        val offer = database.findActiveOffer(destination = dest, type = type, Ondate = LocalDateTime.now())
+        val offer = database.findActiveOffer(destination = dest, type = type, onDate = LocalDate.now())
         val finalPrice = calculateFinalPrice(basePrice, offer)
-
 
         lastSearchedDestination = dest
         lastSearchedType = type
@@ -32,35 +30,34 @@ class TicketMachine(
         lastAppliedOffer = offer
 
         return finalPrice}
+
     fun calculateBasePrice(dest: Destination, type: TicketType): Double{
         return TODO("Provide the return value")
     }
     fun calculateFinalPrice(basePrice: Double, offer: SpecialOffer?): Double{
         return TODO("Provide the return value")
     }
-    fun buyTicket(){
-        val user = currentUser ?: error("No user selected")
-        val card = currentCard ?: error("No card inserted")
+    fun buyTicket(): Ticket? {
+        val user = currentUser ?: return null
+        val card = currentCard ?: return null
+        val dest = lastSearchedDestination ?: return null
+        val type = lastSearchedType ?: return null
+        val price = lastCalculatedPrice ?: return null
 
-        val dest = lastSearchedDestination ?: error("No ticket searched")
-        val type = lastSearchedType ?: error("No ticket searched")
-        val price = lastCalculatedPrice ?: error("No ticket searched")
+        val charge = database.chargeCard(card, price)
+        if (!charge) return null
 
-        val success = database.chargeCard(card, price)
-        if (!success) error("Card declined")
+        card.deduct(price)
+        database.updateCard(card)
 
-        database.createTicket(
-            dest = dest,
+        return database.createTicket(
+            destination = dest,
             type = type,
             price = price,
             username = user.username,
-            cardNumber = card.cardNumber
+            cardNumber = card.cardNumber,
+            origin = originStation,
         )
-
-        lastSearchedDestination = null
-        lastSearchedType = null
-        lastCalculatedPrice = null
-        lastAppliedOffer = null
     }
 
     fun getCurrentCard(): Card? = currentCard
@@ -85,6 +82,4 @@ class TicketMachine(
     fun changeAllTicketPrices(percent: Double): Double{
         return TODO("Provide the return value")
     }
-
-
 }
