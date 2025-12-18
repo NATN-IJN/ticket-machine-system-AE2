@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
-//import kotlin.io.path.Path
+import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.outputStream
 
@@ -89,10 +89,11 @@ object DatabaseManager {
         }
         return target
     }
-}
+
     fun getCard(cardNumber: String): Card? = transaction {
         CardsTable
-            .select { CardsTable.cardNumber eq cardNumber }
+            .selectAll()
+            .where { CardsTable.cardNumber eq cardNumber }
             .singleOrNull()
             ?.let {
                 Card(
@@ -109,3 +110,4 @@ object DatabaseManager {
             it[balance] = card.balance
         }
     }
+}

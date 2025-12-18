@@ -7,7 +7,14 @@ import com.ticketmachine.ui.App
 
 fun main() = application {
     DatabaseManager.connect()
-    Window(onCloseRequest = ::exitApplication, title = "Ticket Machine") {
-        App()
-    }
+
+    val card1 = DatabaseManager.getCard("4242424242424242")
+    println("Before: ${card1?.balance}")
+
+    card1?.deduct(10.0)
+    DatabaseManager.updateCard(card1!!)
+
+    val card2 = DatabaseManager.getCard("4242424242424242")
+    println("After: ${card2?.balance}")
+
 }
