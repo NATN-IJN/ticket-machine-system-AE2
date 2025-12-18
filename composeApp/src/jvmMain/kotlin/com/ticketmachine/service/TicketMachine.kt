@@ -25,9 +25,10 @@ class TicketMachine(
 
     fun getCurrentCard(): Card? = currentCard
     fun insertCard(cardNumber: String): Card?{
-        return TODO("Provide the return value")
+        val card = database.getCard(cardNumber) ?: return null
+        currentCard = card
+        return card
     }
-    fun setCard(card: Card) { currentCard = card }
 
     fun updateTicket(ticketRef: String){
         return TODO("Provide the return value")
