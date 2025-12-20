@@ -9,6 +9,7 @@ import com.ticketmachine.domain.User
 import java.time.LocalDate
 import com.ticketmachine.domain.Card
 import com.ticketmachine.domain.Destination
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
@@ -32,6 +33,16 @@ object DatabaseManager {
             url = "jdbc:sqlite:${targetPath.toAbsolutePath()}",
             driver = "org.sqlite.JDBC"
         )
+        println("DB path in use = ${targetPath.toAbsolutePath()}")
+        transaction {
+            SchemaUtils.create(
+                DestinationsTable,
+                CardsTable,
+                TicketsTable
+                // SpecialOffersTable later
+            )
+        }
+        seedDestinationsIfEmpty()
     }
 
     /**
@@ -119,9 +130,20 @@ object DatabaseManager {
     }
 
 
-    fun findDestination(name: String): Destination? {
-        // TODO: query DestinationsTable by name
-        return null
+    fun findDestination(name: String): Destination? = transaction {
+        DestinationsTable
+            .selectAll()
+            .where { DestinationsTable.name eq name }
+            .singleOrNull()
+            ?.let {
+                Destination(
+                    name = it[DestinationsTable.name],
+                    singlePrice = it[DestinationsTable.singlePrice],
+                    returnPrice = it[DestinationsTable.returnPrice],
+                    takings = it[DestinationsTable.takings],
+                    salesCount = it[DestinationsTable.salesCount]
+                )
+            }
     }
 
     fun checkSpecialOffer(dest: Destination, type: TicketType): SpecialOffer? {
@@ -166,6 +188,8 @@ object DatabaseManager {
             type = type,
             status = TicketStatus.ACTIVE
         )
+
+
     }
 
     fun updateTicketStatus(ticketRef: String){
@@ -219,5 +243,17 @@ object DatabaseManager {
     private fun generateTicketRef(): String {
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         return (1..4).map { chars.random() }.joinToString("")
+    }
+
+    fun seedDestinationsIfEmpty() = transaction {
+        if (DestinationsTable.selectAll().empty()) {
+            DestinationsTable.insert {
+                it[name] = "North Bridge"
+                it[singlePrice] = 2.50
+                it[returnPrice] = 4.00
+                it[takings] = 0.0
+                it[salesCount] = 0
+            }
+        }
     }
 }
