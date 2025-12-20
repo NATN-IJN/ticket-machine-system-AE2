@@ -30,12 +30,9 @@ class TicketMachine(
         lastAppliedOffer = offer
 
         return finalPrice}
-
-    fun calculateBasePrice(dest: Destination, type: TicketType): Double{
-        return TODO("Provide the return value")
-    }
     fun calculateFinalPrice(basePrice: Double, offer: SpecialOffer?): Double{
-        return TODO("Provide the return value")
+        return if (offer != null) {basePrice * offer.discountFactor}
+        else{basePrice}
     }
     fun buyTicket(): Ticket? {
         val user = currentUser ?: return null
@@ -47,8 +44,13 @@ class TicketMachine(
         val charge = database.chargeCard(card, price)
         if (!charge) return null
 
+        dest.updateTakingsAndSales(price)
+        database.saveAllDestinations(listOf(dest))
+
         card.deduct(price)
         database.updateCard(card)
+
+
 
         return database.createTicket(
             destination = dest,
