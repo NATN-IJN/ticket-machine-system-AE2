@@ -152,9 +152,12 @@ object DatabaseManager {
     }
 
     fun chargeCard(card: Card, amount: Double): Boolean {
-        // TODO: read balance from card.cardNumber and compare with calculated price.
-        //  if balance > price -> return true else false
-        return false
+        if (amount <= 0.0) return false
+        if(amount > card.balance) return false
+        card.deduct(amount)
+        updateCard(card)
+
+        return true
     }
 
     fun createTicket(
@@ -236,8 +239,8 @@ object DatabaseManager {
         destination: Destination,
         type: TicketType,
         onDate: LocalDate
-    ): SpecialOffer? {
-        return TODO("returns active special offers")
+    ): SpecialOffer? = transaction {
+        null
     }
 
     private fun generateTicketRef(): String {
