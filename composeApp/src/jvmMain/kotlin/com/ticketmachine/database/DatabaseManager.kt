@@ -9,6 +9,7 @@ import com.ticketmachine.domain.User
 import java.time.LocalDate
 import com.ticketmachine.domain.Card
 import com.ticketmachine.domain.Destination
+import com.ticketmachine.domain.OfferStatus
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -38,8 +39,8 @@ object DatabaseManager {
             SchemaUtils.create(
                 DestinationsTable,
                 CardsTable,
-                TicketsTable
-                // SpecialOffersTable later
+                TicketsTable,
+                SpecialOffersTable
             )
         }
         seedDestinationsIfEmpty()
@@ -240,7 +241,29 @@ object DatabaseManager {
         type: TicketType,
         onDate: LocalDate
     ): SpecialOffer? = transaction {
-        null
+
+        SpecialOffersTable
+            .selectAll()
+            .where {
+                (SpecialOffersTable.destination eq destination.name) and
+                        (SpecialOffersTable.ticketType eq type.name) and
+                        (SpecialOffersTable.status eq OfferStatus.ACTIVE.name)
+            }
+            .singleOrNull()
+            ?.let { row ->
+
+                val offer = SpecialOffer(
+                    offerId = row[SpecialOffersTable.id].value,
+                    destination = destination,
+                    ticketType = TicketType.valueOf(row[SpecialOffersTable.ticketType]),
+                    discountFactor = row[SpecialOffersTable.discountFactor],
+                    startDate = LocalDate.parse(row[SpecialOffersTable.startDate]),
+                    endDate = LocalDate.parse(row[SpecialOffersTable.endDate]),
+                    status = OfferStatus.valueOf(row[SpecialOffersTable.status])
+                )
+
+                if (offer.isActiveOn(onDate)) offer else null
+            }
     }
 
     private fun generateTicketRef(): String {
