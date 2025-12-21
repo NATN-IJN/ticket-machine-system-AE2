@@ -12,6 +12,7 @@ import com.ticketmachine.domain.Destination
 import com.ticketmachine.domain.OfferStatus
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
@@ -186,7 +187,7 @@ object DatabaseManager {
 
         Ticket(
             ticketRef = ticketRef,
-            origin = origin,                 // passed in
+            origin = origin,
             destination = destination,
             price = price,
             type = type,
@@ -200,9 +201,38 @@ object DatabaseManager {
         // TODO: Changes ticketStatus to CANCELLED/REFUNDED
     }
 
-    fun getTicket(ticketRef: String, user: String?): Ticket? {
-        // TODO: query Tickets table by ticketRef and user
-        return null
+    fun getTicket(ticketRef: String, user: String?, origin: String): Ticket? = transaction {
+        val row = TicketsTable
+            .selectAll()
+            .where {
+                (TicketsTable.ticketRef eq ticketRef) and
+                        (TicketsTable.username eq (user ?: ""))
+            }
+            .singleOrNull()
+            ?: return@transaction null
+
+        val destRow = DestinationsTable
+            .selectAll()
+            .where { DestinationsTable.name eq row[TicketsTable.destinationName] }
+            .singleOrNull()
+            ?: return@transaction null
+
+        val destination = Destination(
+            name = destRow[DestinationsTable.name],
+            singlePrice = destRow[DestinationsTable.singlePrice],
+            returnPrice = destRow[DestinationsTable.returnPrice],
+            takings = destRow[DestinationsTable.takings],
+            salesCount = destRow[DestinationsTable.salesCount]
+        )
+
+        Ticket(
+            ticketRef = row[TicketsTable.ticketRef],
+            origin = origin, // comes from TicketMachine.originStation when you call this
+            destination = destination,
+            price = row[TicketsTable.price],
+            type = TicketType.valueOf(row[TicketsTable.type]),
+            status = TicketStatus.valueOf(row[TicketsTable.status])
+        )
     }
 
     fun getAdmin(username: String): Admin? {

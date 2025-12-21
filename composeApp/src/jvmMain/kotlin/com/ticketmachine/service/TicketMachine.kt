@@ -57,7 +57,6 @@ class TicketMachine(
         )
     }
 
-    fun getCurrentCard(): Card? = currentCard
     fun insertCard(cardNumber: String): Card?{
         val card = database.getCard(cardNumber) ?: return null
         currentCard = card
