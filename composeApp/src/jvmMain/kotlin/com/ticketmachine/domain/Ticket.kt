@@ -1,6 +1,6 @@
 package com.ticketmachine.domain
 
-class Ticket(
+data class Ticket(
     val ticketRef: String,
     val origin: String,
     val destination: Destination,

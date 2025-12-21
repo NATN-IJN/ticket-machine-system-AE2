@@ -1,6 +1,6 @@
 package com.ticketmachine.domain
 
-class Destination(
+data class Destination(
     val name: String,
     var singlePrice: Double,
     var returnPrice: Double,

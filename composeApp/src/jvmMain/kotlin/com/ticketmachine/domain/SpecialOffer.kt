@@ -2,8 +2,8 @@ package com.ticketmachine.domain
 
 import java.time.LocalDate
 
-class SpecialOffer(
-    val offerId: String,
+data class SpecialOffer(
+    val offerId: Int,
     val destination: Destination,
     val ticketType: TicketType,
     val discountFactor: Double,          // e.g. 0.80 means 20% off

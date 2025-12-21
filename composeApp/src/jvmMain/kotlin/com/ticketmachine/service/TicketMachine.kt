@@ -31,7 +31,7 @@ class TicketMachine(
 
         return finalPrice}
     fun calculateFinalPrice(basePrice: Double, offer: SpecialOffer?): Double{
-        return if (offer != null) {basePrice * offer.discountFactor}
+        return if (offer != null) {offer.applyTo(basePrice)}
         else{basePrice}
     }
     fun buyTicket(): Ticket? {
@@ -46,11 +46,6 @@ class TicketMachine(
 
         dest.updateTakingsAndSales(price)
         database.saveAllDestinations(listOf(dest))
-
-        card.deduct(price)
-        database.updateCard(card)
-
-
 
         return database.createTicket(
             destination = dest,

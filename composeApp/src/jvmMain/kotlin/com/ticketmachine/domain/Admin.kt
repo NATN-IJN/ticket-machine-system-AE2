@@ -1,6 +1,6 @@
 package com.ticketmachine.domain
 
-class Admin(
+data class Admin(
     val username: String,
     private val password: String
 ) {
