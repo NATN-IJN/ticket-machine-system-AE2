@@ -24,10 +24,15 @@ fun SelectUserScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedButton(onClick = onBack) { Text("Back") }
-        Button(
-            onClick = { onContinue(User(username.trim())) },
-            enabled = username.trim().isNotEmpty()
-        ) { Text("Continue") }
+        Row(
+
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(onClick = onBack) { Text("Back") }
+            Button(
+                onClick = { onContinue(User(username.trim())) },
+                enabled = username.trim().isNotEmpty()
+            ) { Text("Continue") }
+        }
     }
 }
