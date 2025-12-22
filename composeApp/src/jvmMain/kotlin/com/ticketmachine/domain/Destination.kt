@@ -9,9 +9,8 @@ data class Destination(
 ) {
 
     fun adjustPrices(percent: Double) {
-        // percent is a multiplier like 1.10 (increase 10%) or 0.90 (decrease 10%)
-        singlePrice *= percent
-        returnPrice *= percent
+        singlePrice *= ((percent/100.0)+1)
+        returnPrice *= ((percent/100.0)+1)
     }
 
     fun setPrices(newSingle: Double, newReturn: Double) {
