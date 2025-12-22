@@ -329,4 +329,11 @@ object DatabaseManager {
             }
         }
     }
+    fun EditPrices(name: String, newSingle: Double, newReturn: Double): Boolean = transaction {
+        val rows = DestinationsTable.update({ DestinationsTable.name eq name }) {
+            it[singlePrice] = newSingle
+            it[returnPrice] = newReturn
+        }
+        rows > 0
+    }
 }
