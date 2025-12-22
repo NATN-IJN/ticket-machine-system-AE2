@@ -24,11 +24,20 @@ class AdminHub(
     fun viewDestination(name: String): Destination?{
         database.findDestination(name)
     }
+
     fun addDestination(){
         return TODO("Provide the return value")
     }
-    fun updateDestinationPrices(name: String){
-        return TODO("Provide the return value")
+    fun updateDestinationPrices(destination: Destination, newSingle: Double, newReturn: Double): Destination? {
+        if (newSingle <= 0.0 || newReturn <= 0.0) return null
+        destination.setPrices(newSingle = newSingle, newReturn = newReturn)
+        val ok = database.EditPrices(
+            name = destination.name,
+            newSingle = destination.singlePrice,
+            newReturn = destination.returnPrice
+        )
+        if (!ok) return null
+        return destination
     }
 
     fun addSpecialOffer(name: String){
