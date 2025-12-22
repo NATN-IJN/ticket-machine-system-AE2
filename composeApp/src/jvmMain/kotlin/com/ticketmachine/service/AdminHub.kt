@@ -58,5 +58,17 @@ class AdminHub(
         return TODO("Provide the return value")
     }
 
+    fun changeAllTicketPrices(percent: Double): List<Destination>? {
+        val admin = currentAdmin ?: return null
+        if (percent <= 0.0) return null
 
+        val destinations = database.getAllDestinations().toMutableList()
+        if (destinations.isEmpty()) return emptyList()
+
+        destinations.forEach { it.adjustPrices(percent) }
+
+        database.saveAllDestinations(destinations)
+
+        return destinations
+    }
 }
