@@ -22,7 +22,7 @@ class AdminHub(
     }
 
     fun viewDestination(name: String): Destination?{
-        return TODO("Provide the return value")
+        database.findDestination(name)
     }
     fun addDestination(){
         return TODO("Provide the return value")
