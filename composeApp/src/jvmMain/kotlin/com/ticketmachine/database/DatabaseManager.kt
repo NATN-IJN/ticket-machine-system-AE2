@@ -41,7 +41,8 @@ object DatabaseManager {
                 DestinationsTable,
                 CardsTable,
                 TicketsTable,
-                SpecialOffersTable
+                SpecialOffersTable,
+                AdminsTable
             )
         }
         seedDestinationsIfEmpty()
@@ -243,9 +244,17 @@ object DatabaseManager {
         )
     }
 
-    fun getAdmin(username: String): Admin? {
-        // TODO: query Admins table by username
-        return null
+    fun getAdmin(username: String): Admin? = transaction {
+        AdminsTable
+            .selectAll()
+            .where { AdminsTable.username eq username }
+            .singleOrNull()
+            ?.let {
+                Admin(
+                    username = it[AdminsTable.username],
+                    password = it[AdminsTable.password]
+                )
+            }
     }
 
     fun createDestination(name: String, singlePrice: Double, returnPrice: Double) {

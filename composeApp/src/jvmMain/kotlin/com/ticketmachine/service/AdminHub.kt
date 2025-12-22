@@ -10,7 +10,10 @@ class AdminHub(
     private var currentAdmin: Admin? = null
 
     fun login(username: String, password: String): Boolean{
-        return true
+        val admin = database.getAdmin(username) ?: return false
+        val ok = admin.checkLogin(password)
+        if (ok) currentAdmin = admin
+        return ok
     }
     fun setCurrentAdmin(admin: Admin) { currentAdmin = admin }
 
