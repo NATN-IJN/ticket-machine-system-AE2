@@ -71,8 +71,21 @@ class TicketMachine(
     fun viewTicket(ticketRef: String): Ticket?{
         return TODO("Provide the return value")
     }
-    fun cancelTicket(ticketRef: String){
-        return TODO("Provide the return value")
+    fun cancelTicket(ticketRef: String): Ticket? {
+        val user = currentUser ?: return null
+
+        val ticket = database.getTicket(
+            ticketRef = ticketRef,
+            user = user.username,
+            origin = originStation
+        ) ?: return null
+
+        if (ticket.status == TicketStatus.CANCELLED) return ticket
+
+        val ok = database.updateTicketStatus(ticketRef, user.username)
+        if (!ok) return null
+
+        return ticket.copy(status = TicketStatus.CANCELLED)
     }
 
     fun changeAllTicketPrices(percent: Double): Double{
