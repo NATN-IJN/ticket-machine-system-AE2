@@ -69,7 +69,14 @@ class TicketMachine(
     fun setCurrentUser(user: User) { currentUser = user }
 
     fun viewTicket(ticketRef: String): Ticket?{
-        return TODO("Provide the return value")
+        val user = currentUser ?: return null
+
+        val ticket = database.getTicket(
+            ticketRef = ticketRef,
+            user = user.username,
+            origin = originStation
+        ) ?: return null
+        return ticket
     }
     fun cancelTicket(ticketRef: String): Ticket? {
         val user = currentUser ?: return null
