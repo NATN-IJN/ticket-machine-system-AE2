@@ -25,8 +25,16 @@ class AdminHub(
         database.findDestination(name)
     }
 
-    fun addDestination(){
-        return TODO("Provide the return value")
+    fun addDestination(name: String, single: Double, returnP: Double): Destination? {
+        val admin = currentAdmin ?: return null
+
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return null
+        if (single <= 0.0 || returnP <= 0.0) return null
+
+        val existing = database.findDestination(trimmed)
+        if (existing != null) return null
+        return database.createDestination(trimmed, single, returnP)
     }
     fun updateDestinationPrices(destination: Destination, newSingle: Double, newReturn: Double): Destination? {
         if (newSingle <= 0.0 || newReturn <= 0.0) return null
@@ -49,4 +57,6 @@ class AdminHub(
     fun confirmDelete(){
         return TODO("Provide the return value")
     }
+
+
 }
