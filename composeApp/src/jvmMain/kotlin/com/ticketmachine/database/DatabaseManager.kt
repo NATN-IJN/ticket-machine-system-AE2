@@ -257,9 +257,27 @@ object DatabaseManager {
             }
     }
 
-    fun createDestination(name: String, singlePrice: Double, returnPrice: Double) {
-        // TODO: insert new destination into DestinationsTable
-        throw NotImplementedError("createDestination not implemented yet")
+    fun createDestination(
+        name: String,
+        singlePrice: Double,
+        returnPrice: Double
+    ): Destination = transaction {
+
+        DestinationsTable.insert {
+            it[DestinationsTable.name] = name
+            it[DestinationsTable.singlePrice] = singlePrice
+            it[DestinationsTable.returnPrice] = returnPrice
+            it[DestinationsTable.takings] = 0.0
+            it[DestinationsTable.salesCount] = 0
+        }
+
+        Destination(
+            name = name,
+            singlePrice = singlePrice,
+            returnPrice = returnPrice,
+            takings = 0.0,
+            salesCount = 0
+        )
     }
 
     fun saveSpecialOffer(
