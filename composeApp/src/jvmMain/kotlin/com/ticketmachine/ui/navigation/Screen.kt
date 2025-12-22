@@ -8,5 +8,7 @@ sealed class Screen {
     data object SelectUser : Screen()
     data object InsertCard : Screen()
     data object SearchTicket : Screen()
+    data object CancelTicket : Screen()
+    data object ViewTicket : Screen()
     data class Confirmation(val ticket: Ticket) : Screen()
 }

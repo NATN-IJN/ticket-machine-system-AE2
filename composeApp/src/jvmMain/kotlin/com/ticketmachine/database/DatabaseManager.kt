@@ -197,8 +197,16 @@ object DatabaseManager {
 
     }
 
-    fun updateTicketStatus(ticketRef: String){
-        // TODO: Changes ticketStatus to CANCELLED/REFUNDED
+    fun updateTicketStatus(ticketRef: String, username: String): Boolean = transaction {
+        val updatedRows = TicketsTable.update(
+            where = {
+                (TicketsTable.ticketRef eq ticketRef) and
+                        (TicketsTable.username eq username)
+            }
+        ) {
+            it[status] = TicketStatus.CANCELLED.name
+        }
+        updatedRows > 0
     }
 
     fun getTicket(ticketRef: String, user: String?, origin: String): Ticket? = transaction {
@@ -227,7 +235,7 @@ object DatabaseManager {
 
         Ticket(
             ticketRef = row[TicketsTable.ticketRef],
-            origin = origin, // comes from TicketMachine.originStation when you call this
+            origin = origin,
             destination = destination,
             price = row[TicketsTable.price],
             type = TicketType.valueOf(row[TicketsTable.type]),

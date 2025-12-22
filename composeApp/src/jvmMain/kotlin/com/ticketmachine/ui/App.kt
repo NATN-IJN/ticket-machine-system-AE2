@@ -31,8 +31,8 @@ fun App() {
 
         Screen.UserMenu -> UserMenuScreen(
             onSearchTicket = {screen = Screen.SearchTicket},
-            onViewTicket = { /* TODO later */ },
-            onCancelTicket = { /* TODO later */ },
+            onViewTicket = {screen = Screen.ViewTicket },
+            onCancelTicket = {screen = Screen.CancelTicket},
             onInsertCard =  {screen = Screen.InsertCard},
             onBack = { screen = Screen.SelectUser })
 
@@ -50,6 +50,16 @@ fun App() {
             onPurchased = { ticket ->
                 screen = Screen.Confirmation(ticket)
             }
+        )
+
+        Screen.CancelTicket -> CancelTicketScreen(
+            ticketMachine = ticketMachine,
+            onBack = { screen = Screen.UserMenu }
+        )
+
+        Screen.ViewTicket -> ViewTicketScreen(
+            ticketMachine = ticketMachine,
+            onBack = { screen = Screen.UserMenu }
         )
 
         is Screen.Confirmation -> ConfirmationScreen(
