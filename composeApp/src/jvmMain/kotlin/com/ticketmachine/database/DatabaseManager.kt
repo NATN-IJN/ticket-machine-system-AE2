@@ -286,9 +286,28 @@ object DatabaseManager {
         discount: Double,
         startDate: LocalDate,
         endDate: LocalDate
-    ): SpecialOffer {
-        // TODO: insert new special offer into SpecialOffers table and return SpecialOffer object
-        throw NotImplementedError("saveSpecialOffer not implemented yet")
+    ): SpecialOffer = transaction {
+
+        val soTable = SpecialOffersTable.insert {
+            it[SpecialOffersTable.destination] = destination.name
+            it[SpecialOffersTable.ticketType] = ticketType.name
+            it[SpecialOffersTable.discountFactor] = discount
+            it[SpecialOffersTable.startDate] = startDate.toString()
+            it[SpecialOffersTable.endDate] = endDate.toString()
+            it[SpecialOffersTable.status] = OfferStatus.ACTIVE.name
+        }
+
+        val id = soTable[SpecialOffersTable.offerId]
+
+        SpecialOffer(
+            offerId = id,
+            destination = destination,
+            ticketType = ticketType,
+            discountFactor = discount,
+            startDate = startDate,
+            endDate = endDate,
+            status = OfferStatus.ACTIVE
+        )
     }
 
     fun getSpecialOffer(id: String): SpecialOffer? {
@@ -318,7 +337,7 @@ object DatabaseManager {
             ?.let { row ->
 
                 val offer = SpecialOffer(
-                    offerId = row[SpecialOffersTable.id].value,
+                    offerId = row[SpecialOffersTable.offerId],
                     destination = destination,
                     ticketType = TicketType.valueOf(row[SpecialOffersTable.ticketType]),
                     discountFactor = row[SpecialOffersTable.discountFactor],
