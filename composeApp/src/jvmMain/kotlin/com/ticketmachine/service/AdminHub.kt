@@ -67,11 +67,17 @@ class AdminHub(
             endDate = endDate
         )
     }
-    fun searchSpecialOfferId(id: String){
-        return TODO("Provide the return value")
+    fun searchSpecialOfferId(id: Int): SpecialOffer? {
+        val admin = currentAdmin ?: return null
+        return database.getSpecialOffer(id)
     }
-    fun confirmDelete(){
-        return TODO("Provide the return value")
+    fun DeleteOffer(id: Int) : SpecialOffer? {
+        val admin = currentAdmin ?: return null
+        val offer = database.getSpecialOffer(id) ?: return null
+        val ok = database.deleteSpecialOffer(id)
+        if (!ok) return null
+
+        return offer.copy(status = OfferStatus.CANCELLED)
     }
 
     fun changeAllTicketPrices(percent: Double): List<Destination>? {
