@@ -310,14 +310,45 @@ object DatabaseManager {
         )
     }
 
-    fun getSpecialOffer(id: String): SpecialOffer? {
-        // TODO: query SpecialOffers table by offerId
-        return null
+    fun getSpecialOffer(id: Int): SpecialOffer? = transaction {
+        val row = SpecialOffersTable
+            .selectAll()
+            .where { SpecialOffersTable.offerId eq id }
+            .singleOrNull() ?: return@transaction null
+
+        val destName = row[SpecialOffersTable.destination]
+
+        val destRow = DestinationsTable
+            .selectAll()
+            .where { DestinationsTable.name eq destName }
+            .singleOrNull() ?: return@transaction null
+
+        val destination = Destination(
+            name = destRow[DestinationsTable.name],
+            singlePrice = destRow[DestinationsTable.singlePrice],
+            returnPrice = destRow[DestinationsTable.returnPrice],
+            takings = destRow[DestinationsTable.takings],
+            salesCount = destRow[DestinationsTable.salesCount]
+        )
+
+        SpecialOffer(
+            offerId = row[SpecialOffersTable.offerId],
+            destination = destination,
+            ticketType = TicketType.valueOf(row[SpecialOffersTable.ticketType]),
+            discountFactor = row[SpecialOffersTable.discountFactor],
+            startDate = LocalDate.parse(row[SpecialOffersTable.startDate]),
+            endDate = LocalDate.parse(row[SpecialOffersTable.endDate]),
+            status = OfferStatus.valueOf(row[SpecialOffersTable.status])
+        )
     }
 
-    fun deleteSpecialOffer(id: String) {
-        // TODO: delete from SpecialOffers table by offerId
-        throw NotImplementedError("deleteSpecialOffer not implemented yet")
+    fun deleteSpecialOffer(id: Int): Boolean = transaction {
+        val updatedRows = SpecialOffersTable.update(
+            where = { SpecialOffersTable.offerId eq id }
+        ) {
+            it[status] = OfferStatus.CANCELLED.name
+        }
+        updatedRows > 0
     }
 
     fun findActiveOffer(
