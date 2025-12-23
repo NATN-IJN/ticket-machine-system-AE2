@@ -2,6 +2,7 @@ package com.ticketmachine.service
 
 import com.ticketmachine.database.DatabaseManager
 import com.ticketmachine.domain.*
+import java.time.LocalDate
 
 class AdminHub(
     private val database: DatabaseManager,
@@ -22,7 +23,7 @@ class AdminHub(
     }
 
     fun viewDestination(name: String): Destination?{
-        database.findDestination(name)
+        return database.findDestination(name)
     }
 
     fun addDestination(name: String, single: Double, returnP: Double): Destination? {
@@ -48,8 +49,23 @@ class AdminHub(
         return destination
     }
 
-    fun addSpecialOffer(name: String){
-        return TODO("Provide the return value")
+    fun addSpecialOffer(
+        destinationName: String,
+        ticketType: TicketType,
+        discountFactor: Double,
+        startDate: LocalDate,
+        endDate: LocalDate
+        ): SpecialOffer? {
+
+        val admin = currentAdmin ?: return null
+        val dest = database.findDestination(destinationName.trim()) ?: return null
+        return database.saveSpecialOffer(
+            destination = dest,
+            ticketType = ticketType,
+            discount = discountFactor,
+            startDate = startDate,
+            endDate = endDate
+        )
     }
     fun searchSpecialOfferId(id: String){
         return TODO("Provide the return value")
