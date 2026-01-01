@@ -5,14 +5,14 @@ import com.ticketmachine.domain.SpecialOffer
 import com.ticketmachine.domain.Ticket
 import com.ticketmachine.domain.TicketType
 import com.ticketmachine.domain.TicketStatus
-import com.ticketmachine.domain.User
+
 import java.time.LocalDate
 import com.ticketmachine.domain.Card
 import com.ticketmachine.domain.Destination
 import com.ticketmachine.domain.OfferStatus
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
@@ -24,9 +24,6 @@ object DatabaseManager {
 
     private var db: Database? = null
 
-    /**
-     * Connects Exposed to a writable copy of the SQLite DB.
-     */
     fun connect(dbFileName: String = "ticketmachine.db") {
         if (db != null) return
 
@@ -37,7 +34,7 @@ object DatabaseManager {
         )
         println("DB path in use = ${targetPath.toAbsolutePath()}")
         transaction {
-            SchemaUtils.create(
+            SchemaUtils.createMissingTablesAndColumns(
                 DestinationsTable,
                 CardsTable,
                 TicketsTable,
@@ -48,9 +45,9 @@ object DatabaseManager {
         seedDestinationsIfEmpty()
     }
 
-    /**
-     * Reads all destinations from the database.
-     */
+    fun disconnectForTests() {
+        db = null
+    }
     fun getAllDestinations(): List<Destination> = transaction {
         DestinationsTable
             .selectAll()
@@ -65,9 +62,6 @@ object DatabaseManager {
             }
     }
 
-    /**
-     * Persists updated destination prices / takings / sales.
-     */
     fun saveAllDestinations(destinations: List<Destination>) = transaction {
         destinations.forEach { d ->
             val updated = DestinationsTable.update({ DestinationsTable.name eq d.name }) {
@@ -89,9 +83,6 @@ object DatabaseManager {
         }
     }
 
-    /**
-     * Copies the bundled DB from resources to a writable folder.
-     */
     private fun ensureWritableDbCopy(dbFileName: String): Path {
         val appDir = Path(System.getProperty("user.home"), ".ticketmachineae2")
         Files.createDirectories(appDir)
@@ -101,20 +92,24 @@ object DatabaseManager {
 
         val resourcePath = "/db/$dbFileName"
         val input = DatabaseManager::class.java.getResourceAsStream(resourcePath)
-            ?: error("Database not found at $resourcePath")
 
-        input.use { ins ->
-            target.outputStream().use { outs ->
-                ins.copyTo(outs)
+        if (input != null) {
+            input.use { ins ->
+                target.outputStream().use { outs ->
+                    ins.copyTo(outs)
+                }
             }
+        } else {
+            Files.createFile(target)
         }
         return target
     }
 
     fun getCard(cardNumber: String): Card? = transaction {
+        val trimmedCardNumber = cardNumber.trim()
         CardsTable
             .selectAll()
-            .where { CardsTable.cardNumber eq cardNumber }
+            .where { CardsTable.cardNumber eq trimmedCardNumber }
             .singleOrNull()
             ?.let {
                 Card(
@@ -129,6 +124,15 @@ object DatabaseManager {
             where = { CardsTable.cardNumber eq card.cardNumber }
         ) {
             it[balance] = card.balance
+        }
+    }
+
+    fun updateDestination(destination: Destination) = transaction {
+        DestinationsTable.update(
+            where = { DestinationsTable.name eq destination.name }
+        ) {
+            it[salesCount] = destination.salesCount
+            it[takings] = destination.takings
         }
     }
 
@@ -149,11 +153,6 @@ object DatabaseManager {
             }
     }
 
-    fun checkSpecialOffer(dest: Destination, type: TicketType): SpecialOffer? {
-        // TODO: query SpecialOffersTable for active offer for (dest, type, date)
-        return null
-    }
-
     fun chargeCard(card: Card, amount: Double): Boolean {
         if (amount <= 0.0) return false
         if(amount > card.balance) return false
@@ -170,7 +169,8 @@ object DatabaseManager {
         username: String,
         cardNumber: String,
         origin: String
-    ): Ticket = transaction {
+    ): Ticket =
+        transaction {
 
         val ticketRef = generateTicketRef()
         val purchaseDate = LocalDate.now().toString()
@@ -286,7 +286,10 @@ object DatabaseManager {
         discount: Double,
         startDate: LocalDate,
         endDate: LocalDate
-    ): SpecialOffer = transaction {
+    ): SpecialOffer? = transaction {
+
+        if (endDate.isBefore(startDate)) return@transaction null
+        if (discount <= 0.0 || discount >= 1.0) return@transaction null
 
         val soTable = SpecialOffersTable.insert {
             it[SpecialOffersTable.destination] = destination.name

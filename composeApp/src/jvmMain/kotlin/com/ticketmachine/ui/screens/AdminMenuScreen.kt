@@ -1,5 +1,4 @@
 package com.ticketmachine.ui.screens
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,30 +9,24 @@ import androidx.compose.ui.unit.dp
 
 private enum class AdminMenuOption {
     VIEW_DESTINATION,
-    UPDATE_DESTINATION_PRICES,
     ADD_DESTINATION,
     CHANGE_ALL_TICKET_PRICES,
     ADD_SPECIAL_OFFER,
-    DELETE_SPECIAL_OFFER
+    SEARCH_SPECIAL_OFFER,
+
 }
 
 @Composable
 fun AdminMenuScreen(
     onViewDestination: () -> Unit,
-    onUpdateDestinationPrices: () -> Unit,
     onAddDestination: () -> Unit,
     onChangeAllTicketPrices: () -> Unit,
     onAddSpecialOffer: () -> Unit,
-    onDeleteSpecialOffer: () -> Unit,
+    onSearchSpecialOffer: () -> Unit,
     onBack: () -> Unit
 ) {
     var selected by remember { mutableStateOf(AdminMenuOption.VIEW_DESTINATION) }
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp)
-    ) {
         Column(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -43,9 +36,7 @@ fun AdminMenuScreen(
             AdminOptionRow("View Destination", selected == AdminMenuOption.VIEW_DESTINATION) {
                 selected = AdminMenuOption.VIEW_DESTINATION
             }
-            AdminOptionRow("Update Destination Prices", selected == AdminMenuOption.UPDATE_DESTINATION_PRICES) {
-                selected = AdminMenuOption.UPDATE_DESTINATION_PRICES
-            }
+
             AdminOptionRow("Add Destination", selected == AdminMenuOption.ADD_DESTINATION) {
                 selected = AdminMenuOption.ADD_DESTINATION
             }
@@ -55,9 +46,10 @@ fun AdminMenuScreen(
             AdminOptionRow("Add Special Offer", selected == AdminMenuOption.ADD_SPECIAL_OFFER) {
                 selected = AdminMenuOption.ADD_SPECIAL_OFFER
             }
-            AdminOptionRow("Delete Special Offer", selected == AdminMenuOption.DELETE_SPECIAL_OFFER) {
-                selected = AdminMenuOption.DELETE_SPECIAL_OFFER
+            AdminOptionRow("Search Special Offer", selected == AdminMenuOption.SEARCH_SPECIAL_OFFER) {
+                selected = AdminMenuOption.SEARCH_SPECIAL_OFFER
             }
+
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -66,19 +58,17 @@ fun AdminMenuScreen(
                 Button(onClick = {
                     when (selected) {
                         AdminMenuOption.VIEW_DESTINATION -> onViewDestination()
-                        AdminMenuOption.UPDATE_DESTINATION_PRICES -> onUpdateDestinationPrices()
                         AdminMenuOption.ADD_DESTINATION -> onAddDestination()
                         AdminMenuOption.CHANGE_ALL_TICKET_PRICES -> onChangeAllTicketPrices()
                         AdminMenuOption.ADD_SPECIAL_OFFER -> onAddSpecialOffer()
-                        AdminMenuOption.DELETE_SPECIAL_OFFER -> onDeleteSpecialOffer()
+                        AdminMenuOption.SEARCH_SPECIAL_OFFER -> onSearchSpecialOffer()
                     }
                 }) { Text("Continue") }
 
-                OutlinedButton(onClick = onBack) { Text("Back") }
+                OutlinedButton(onClick = onBack) { Text("Logout") }
             }
         }
     }
-}
 
 @Composable
 private fun AdminOptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {

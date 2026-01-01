@@ -6,7 +6,7 @@ data class SpecialOffer(
     val offerId: Int,
     val destination: Destination,
     val ticketType: TicketType,
-    val discountFactor: Double,          // e.g. 0.80 means 20% off
+    val discountFactor: Double,
     val startDate: LocalDate,
     val endDate: LocalDate,
     var status: OfferStatus = OfferStatus.ACTIVE

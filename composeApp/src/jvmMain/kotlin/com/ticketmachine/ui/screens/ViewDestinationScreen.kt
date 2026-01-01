@@ -38,11 +38,20 @@ fun ViewDestinationScreen(
             Button(onClick = {
                 message = null
                 error = null
-                result = adminHub.viewDestination(name.trim())
+                result = null
+
+                val trimmed = name.trim()
+                if (trimmed.isEmpty()) {
+                    error = "Please enter a Destination"
+                    return@Button
+                }
+
+                result = adminHub.viewDestination(trimmed)
                 if (result == null) error = "Destination not found."
             }) {
                 Text("Search")
             }
+
 
             OutlinedButton(onClick = onBack) { Text("Back") }
         }
@@ -69,7 +78,7 @@ fun ViewDestinationScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = { onEdit(d) }) {
-                    Text("Edit Prices")
+                    Text("Update Prices")
                 }
             }
         }

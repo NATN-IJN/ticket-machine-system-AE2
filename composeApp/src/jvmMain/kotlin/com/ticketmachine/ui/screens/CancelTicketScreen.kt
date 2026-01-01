@@ -1,5 +1,4 @@
 package com.ticketmachine.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,94 +16,107 @@ fun CancelTicketScreen(
     onBack: () -> Unit
 ) {
     var ticketRef by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
     var resultText by remember { mutableStateOf<String?>(null) }
     var lastTicket by remember { mutableStateOf<Ticket?>(null) }
 
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Cancel Ticket", style = MaterialTheme.typography.headlineMedium)
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        OutlinedTextField(
+            value = ticketRef,
+            onValueChange = { ticketRef = it },
+            label = { Text("Ticket Reference") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
+        Text(
+            "Are you sure you want to cancel this ticket?",
+            color = MaterialTheme.colorScheme.error
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Cancel Ticket", style = MaterialTheme.typography.headlineMedium)
+            Button(
+                onClick = {
+                    error = null
+                    resultText = null
+                    lastTicket = null
 
-            OutlinedTextField(
-                value = ticketRef,
-                onValueChange = { ticketRef = it },
-                label = { Text("Ticket Reference") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = {
-                        resultText = null
-                        lastTicket = null
-
-                        val trimmed = ticketRef.trim()
-                        if (trimmed.isEmpty()) {
-                            resultText = "Please enter a ticket reference."
-                            return@Button
+                    val trimmed = ticketRef.trim()
+                    when {
+                        trimmed.isEmpty() -> {
+                            error = "Please enter a ticket reference."
                         }
-
-                        val existing = ticketMachine.viewTicket(trimmed)
-                        if (existing == null) {
-                            resultText = "Ticket not found."
-                            return@Button
+                        ticketMachine.viewTicket(trimmed) == null -> {
+                            error = "Ticket not found."
                         }
-
-                        if (existing.status == TicketStatus.CANCELLED) {
-                            resultText = "Ticket is already cancelled."
+                        ticketMachine.viewTicket(trimmed)!!.status == TicketStatus.CANCELLED -> {
+                            val existing = ticketMachine.viewTicket(trimmed)!!
                             lastTicket = existing
-                            return@Button
+                            error = "Ticket is already cancelled."
                         }
-
-
-                        val cancelled = ticketMachine.cancelTicket(trimmed)!!
-                        lastTicket = cancelled
-                        resultText = "Ticket cancelled successfully."
-                    }
-                ) { Text("Cancel") }
-
-                OutlinedButton(onClick = onBack) { Text("Back") }
-            }
-
-            if (resultText != null) {
-                Divider()
-                Text(resultText!!)
-
-                lastTicket?.let { t ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text("Ticket Details", style = MaterialTheme.typography.titleMedium)
-
-                            DetailRow("TICKET REFERENCE:", t.ticketRef)
-                            DetailRow("ORIGIN STATION:", t.origin)
-                            Text("TO", fontWeight = FontWeight.Bold)
-                            DetailRow("DESTINATION STATION:", t.destination.name)
-                            DetailRow("PRICE:", "£${"%.2f".format(t.price)} [${t.type}]")
-                            DetailRow("STATUS:", t.status.name)
+                        else -> {
+                            val cancelled = ticketMachine.cancelTicket(trimmed)
+                            if (cancelled == null) {
+                                error = "Cancel failed."
+                            } else {
+                                lastTicket = cancelled
+                                resultText = "Ticket cancelled successfully."
+                            }
                         }
                     }
                 }
-            }
+            ) { Text("Cancel") }
+
+            OutlinedButton(onClick = onBack) { Text("Back") }
         }
 
+        resultText?.let {
+            HorizontalDivider()
+            Text(it)
+        }
+
+        lastTicket?.let { t ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Ticket Details", style = MaterialTheme.typography.titleMedium)
+
+                    DetailRow("TICKET REFERENCE:", t.ticketRef)
+                    DetailRow("ORIGIN STATION:", t.origin)
+                    Text("TO", fontWeight = FontWeight.Bold)
+                    DetailRow("DESTINATION STATION:", t.destination.name)
+                    DetailRow("PRICE:", "£${"%.2f".format(t.price)} [${t.type}]")
+                    DetailRow("STATUS:", t.status.name)
+                }
+            }
+        }
+    }
 }
+
 @Composable
 private fun DetailRow(label: String, value: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, fontWeight = FontWeight.Bold)
-        Text(value)}}
+        Text(value)
+    }
+}

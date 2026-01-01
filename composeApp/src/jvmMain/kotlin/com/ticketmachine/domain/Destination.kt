@@ -8,9 +8,9 @@ data class Destination(
     var salesCount: Int = 0
 ) {
 
-    fun adjustPrices(percent: Double) {
-        singlePrice *= ((percent/100.0)+1)
-        returnPrice *= ((percent/100.0)+1)
+    fun adjustPrices(factor: Double) {
+        singlePrice *= factor
+        returnPrice *= factor
     }
 
     fun setPrices(newSingle: Double, newReturn: Double) {

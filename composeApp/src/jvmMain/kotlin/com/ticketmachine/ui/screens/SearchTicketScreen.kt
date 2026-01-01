@@ -1,11 +1,9 @@
 package com.ticketmachine.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ticketmachine.database.DatabaseManager
 import com.ticketmachine.domain.Ticket
 import com.ticketmachine.domain.TicketType
 import com.ticketmachine.service.TicketMachine
@@ -16,7 +14,6 @@ fun SearchTicketScreen(
     ticketMachine: TicketMachine,
     onPurchased: (Ticket) -> Unit
 ) {
-    val destinations = remember { DatabaseManager.getAllDestinations() }
 
     var destinationName by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(TicketType.SINGLE) }
@@ -27,7 +24,6 @@ fun SearchTicketScreen(
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Search Ticket", style = MaterialTheme.typography.headlineMedium)
 
-        // Destination dropdown (basic)
         OutlinedTextField(
             value = destinationName,
             onValueChange = { destinationName = it },
@@ -53,7 +49,7 @@ fun SearchTicketScreen(
             Button(onClick = {
                 error = null
                 searchedPrice = ticketMachine.searchTicket(destinationName.trim(), type)
-                if (searchedPrice == null) error = "Could not find ticket for that destination."
+                if (searchedPrice == null) error = "Destination does not exist"
             }) { Text("Search") }
         }
 
@@ -67,8 +63,10 @@ fun SearchTicketScreen(
                     Text("Price: £${"%.2f".format(price)}")
 
                     Button(onClick = {
+                        if (!ticketMachine.hasCard()) { error = "Please insert card first."
+                        return@Button}
                         val bought = ticketMachine.buyTicket()
-                        if (bought != null) onPurchased(bought) else error = "Purchase failed."
+                        if (bought != null) onPurchased(bought) else error = "Card Declined"
                     }) { Text("Buy") }
                 }
             }

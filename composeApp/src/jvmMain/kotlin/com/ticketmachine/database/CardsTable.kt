@@ -7,7 +7,7 @@ object CardsTable : Table("creditcards") {
     val id = integer("id").autoIncrement()
     val cardNumber = varchar("cardnumber", 16)
     val cvc = integer("cvc")
-    val expiry = varchar("expiry", 4)
+    val expiry = varchar("expiry", 6)
     val name = varchar("name", 50)
     val balance = double("balance")
 

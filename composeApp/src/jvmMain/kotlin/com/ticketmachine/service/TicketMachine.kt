@@ -15,6 +15,8 @@ class TicketMachine(
     private var currentCard: Card? = null
 
     fun searchTicket(destName: String, type: TicketType): Double?{
+        val trimmed = destName.trim()
+        if (trimmed.isEmpty()) return null
         val dest = database.findDestination(destName) ?: return null
 
         val basePrice =
@@ -39,18 +41,18 @@ class TicketMachine(
         val card = currentCard ?: return null
         val dest = lastSearchedDestination ?: return null
         val type = lastSearchedType ?: return null
-        val price = lastCalculatedPrice ?: return null
+        val amount = lastCalculatedPrice ?: return null
 
-        val charge = database.chargeCard(card, price)
+        val charge = database.chargeCard(card, amount)
         if (!charge) return null
 
-        dest.updateTakingsAndSales(price)
+        dest.updateTakingsAndSales(amount)
         database.saveAllDestinations(listOf(dest))
 
         return database.createTicket(
             destination = dest,
             type = type,
-            price = price,
+            price = amount,
             username = user.username,
             cardNumber = card.cardNumber,
             origin = originStation,
@@ -61,10 +63,6 @@ class TicketMachine(
         val card = database.getCard(cardNumber) ?: return null
         currentCard = card
         return card
-    }
-
-    fun updateTicket(ticketRef: String, status: TicketStatus){
-        return TODO("Provide the return value")
     }
     fun setCurrentUser(user: User) { currentUser = user }
 
@@ -80,6 +78,7 @@ class TicketMachine(
     }
     fun cancelTicket(ticketRef: String): Ticket? {
         val user = currentUser ?: return null
+        val card = currentCard ?: return null
 
         val ticket = database.getTicket(
             ticketRef = ticketRef,
@@ -88,6 +87,10 @@ class TicketMachine(
         ) ?: return null
 
         if (ticket.status == TicketStatus.CANCELLED) return ticket
+        card.refund(ticket.price)
+        DatabaseManager.updateCard(card)
+        ticket.destination.decrementSalesAndTakings(ticket.price)
+        DatabaseManager.updateDestination(ticket.destination)
 
         val ok = database.updateTicketStatus(ticketRef, user.username)
         if (!ok) return null
@@ -95,7 +98,6 @@ class TicketMachine(
         return ticket.copy(status = TicketStatus.CANCELLED)
     }
 
-    fun changeAllTicketPrices(percent: Double): Double{
-        return TODO("Provide the return value")
-    }
+    fun hasCard(): Boolean = currentCard != null
+
 }

@@ -1,5 +1,4 @@
 package com.ticketmachine.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +17,7 @@ fun ViewTicketScreen(
     var ticketRef by remember { mutableStateOf("") }
     var resultText by remember { mutableStateOf<String?>(null) }
     var ticket by remember { mutableStateOf<Ticket?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -32,8 +32,12 @@ fun ViewTicketScreen(
             onValueChange = { ticketRef = it },
             label = { Text("Ticket Reference") },
             singleLine = true,
+            isError = error != null,
             modifier = Modifier.fillMaxWidth()
         )
+        error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -43,22 +47,25 @@ fun ViewTicketScreen(
                 onClick = {
                     resultText = null
                     ticket = null
+                    error = null
 
                     val trimmed = ticketRef.trim()
+
                     if (trimmed.isEmpty()) {
-                        resultText = "Please enter a ticket reference."
+                        error = "Please enter a ticket reference"
                         return@Button
                     }
 
                     val found = ticketMachine.viewTicket(trimmed)
                     if (found == null) {
-                        resultText = "Ticket not found"
+                        error = "Ticket not found"
                     } else {
                         ticket = found
-                        resultText = "Ticket found."
+                        resultText = "Ticket found"
                     }
                 }
             ) { Text("View") }
+
 
             OutlinedButton(onClick = onBack) { Text("Back") }
         }

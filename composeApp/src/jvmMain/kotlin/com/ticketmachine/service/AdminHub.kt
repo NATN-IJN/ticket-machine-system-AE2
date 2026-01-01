@@ -13,24 +13,18 @@ class AdminHub(
     fun login(username: String, password: String): Boolean{
         val admin = database.getAdmin(username) ?: return false
         val ok = admin.checkLogin(password)
-        if (ok) currentAdmin = admin
+        if (ok) setCurrentAdmin(admin)
         return ok
     }
     fun setCurrentAdmin(admin: Admin) { currentAdmin = admin }
-
-    fun adminMenu() {
-
-    }
-
-    fun viewDestination(name: String): Destination?{
-        return database.findDestination(name)
+    fun viewDestination(name: String): Destination? {
+        return database.findDestination(name.trim())
     }
 
     fun addDestination(name: String, single: Double, returnP: Double): Destination? {
-        val admin = currentAdmin ?: return null
 
         val trimmed = name.trim()
-        if (trimmed.isEmpty()) return null
+        if (trimmed.isBlank()) return null
         if (single <= 0.0 || returnP <= 0.0) return null
 
         val existing = database.findDestination(trimmed)
@@ -57,7 +51,6 @@ class AdminHub(
         endDate: LocalDate
         ): SpecialOffer? {
 
-        val admin = currentAdmin ?: return null
         val dest = database.findDestination(destinationName.trim()) ?: return null
         return database.saveSpecialOffer(
             destination = dest,
@@ -68,11 +61,9 @@ class AdminHub(
         )
     }
     fun searchSpecialOfferId(id: Int): SpecialOffer? {
-        val admin = currentAdmin ?: return null
         return database.getSpecialOffer(id)
     }
-    fun DeleteOffer(id: Int) : SpecialOffer? {
-        val admin = currentAdmin ?: return null
+    fun deleteOffer(id: Int) : SpecialOffer? {
         val offer = database.getSpecialOffer(id) ?: return null
         val ok = database.deleteSpecialOffer(id)
         if (!ok) return null
@@ -80,17 +71,20 @@ class AdminHub(
         return offer.copy(status = OfferStatus.CANCELLED)
     }
 
-    fun changeAllTicketPrices(percent: Double): List<Destination>? {
-        val admin = currentAdmin ?: return null
-        if (percent <= 0.0) return null
+    fun changeAllTicketPrices(factor: Double): List<Destination>? {
+        if (factor <= 0.0) return null
 
         val destinations = database.getAllDestinations().toMutableList()
         if (destinations.isEmpty()) return emptyList()
 
-        destinations.forEach { it.adjustPrices(percent) }
+        destinations.forEach { it.adjustPrices(factor) }
 
         database.saveAllDestinations(destinations)
 
         return destinations
+    }
+
+    fun logout() {
+        currentAdmin = null
     }
 }

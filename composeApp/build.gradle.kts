@@ -34,8 +34,17 @@ kotlin {
             implementation("org.xerial:sqlite-jdbc:3.46.1.0")
             implementation("ch.qos.logback:logback-classic:1.5.6")
         }
+
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.junit.jupiter:junit-jupiter:5.10.2")
+        }
     }
 }
+
+
+
+
 
 
 compose.desktop {
@@ -47,5 +56,12 @@ compose.desktop {
             packageName = "com.ticketmachine"
             packageVersion = "1.0.0"
         }
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
     }
 }
